@@ -150,7 +150,7 @@ void agregarPuntos(Map* mapa) {
   }
 
   int puntaje = 0;
-  printf("Ingrese el nombre del item a agregar:\n");
+  printf("Ingrese el puntaje a agregar:\n");
   scanf("%i", &puntaje);
   jugadorBuscado->puntosH = puntaje;
   printf("Se ha agregado el puntaje '%i' al jugador '%s'\n", puntaje, jugadorBuscado->nombre);
