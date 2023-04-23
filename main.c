@@ -134,8 +134,6 @@ void eliminarItem(Map* mapa) {
 
   
   
-  
-  
 }
 
 void agregarPuntos(Map* mapa) {
