@@ -35,7 +35,7 @@ void crearPerfil(Map* mapa) {
   nuevoJugador = (Jugador *) malloc(sizeof(Jugador));
   nuevoJugador->puntosH = 0;
   nuevoJugador->items = createList();
-  Stack* stack = stack_create();
+  Stack* stack = stack_create(); //Aun no 100% implementada de forma correcta.
   
   
   char nombre[32];
@@ -74,17 +74,16 @@ void mostrarPerfil(Map* mapa) {
     
     void* aux = firstList(jugadorBuscado->items);
     
-    while(aux != NULL) {
-      printf("%i-%s\n",contador,(char*)aux);
-        aux = nextList(jugadorBuscado->items);
-        contador++;
-    }
-    
     if (aux == NULL) {
       printf("El jugador no ha conseguido items hasta el momento\n\n");
     }
+    
+    while(aux != NULL) {
+      printf("%i-%s\n",contador,(char*)aux);
+      aux = nextList(jugadorBuscado->items);
+      contador++;
+    }
   }
-  
 }
 
 void agregarItem(Map* mapa) {
@@ -132,7 +131,18 @@ void eliminarItem(Map* mapa) {
 
   void* aux = firstList(jugadorBuscado->items);
 
-  
+  while(aux != NULL) {
+    if (strcmp(aux,item) == 0) {
+      popCurrent(jugadorBuscado->items);
+      break;
+    }
+    aux = nextList(jugadorBuscado->items);
+  }
+  if(aux == NULL) {
+    printf("El item indicado no existe en el inventario del Jugador %s\n",jugadorBuscado->nombre);
+  } else {
+    printf("Item '%s' eliminado con exito!\n", item);
+  }
   
 }
 
@@ -213,19 +223,19 @@ int main() {
         break;
       case 6:
         //mostrarJugadoresEspecifico(mapaJugador);
-        printf("Funcion no implementada, no vuelva nunca!\n");
+        printf("Funcion no implementada, comeback soon and come in!\n");
         //break;
       case 7:
         //deshacerAccion(mapaJugador);
-        printf("Funcion no implementada, no vuelva nunca!\n");
+        printf("Funcion no implementada, comeback soon and come in!\n");
         //break;
       case 8:
         //exportarArchivo(mapaJugador);
-        printf("Funcion no implementada, no vuelva nunca!\n");
+        printf("Funcion no implementada, comeback soon and come in!\n");
         //break;
       case 9:
         //importarArchivo(mapaJugador);
-        printf("Funcion no implementada, no vuelva nunca!\n");
+        printf("Funcion no implementada, comeback soon and come in!\n");
         //break;
       case 10:
         printf("Cerrando el programa...\n");
