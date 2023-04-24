@@ -198,6 +198,8 @@ void* searchMap(Map * list, void * key) {
     return (void *) aux->data;
 }
 
+
+
 void * eraseMap(Map * list, void * key) {
     assert(list != NULL); // list no puede ser NULL.
 

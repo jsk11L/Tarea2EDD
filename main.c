@@ -166,7 +166,35 @@ void agregarPuntos(Map* mapa) {
   printf("Se ha agregado el puntaje '%i' al jugador '%s'\n", puntaje, jugadorBuscado->nombre);
 }
 
-void mostrarJugadoresEspecifico(Map* mapa) {}
+void mostrarJugadoresEspecifico(Map* mapa) {
+  getchar();
+  char item[32];
+  printf("Ingrese el nombre del item a buscar\n");
+  scanf("%30[^\n]s",item);
+  getchar();
+  printf("%s\n", item);
+  int foundItem = 0;
+
+  Jugador * aux = firstMap(mapa);
+  while (aux != NULL) {
+    void* aux2 = firstList(aux->items);
+    while(aux2 != NULL) {
+      if (strcmp(aux2,item) == 0) {
+        foundItem++;
+        printf("\n === PERFIL DEL JUGADOR === \n");
+        printf("Nombre: %s\n", aux->nombre);
+        printf("Item: %s\n", item);
+      }
+      aux2 = nextList(aux->items);
+    }
+    aux = nextMap(mapa);
+  }
+  
+  if (!foundItem) {
+    printf("Ningún jugador tiene el item '%s'\n", item);
+  }
+  
+}
 
 void deshacerAccion(Map* mapa) {}
 
@@ -222,9 +250,8 @@ int main() {
         agregarPuntos(mapaJugador);
         break;
       case 6:
-        //mostrarJugadoresEspecifico(mapaJugador);
-        printf("Funcion no implementada, comeback soon and come in!\n");
-        //break;
+        mostrarJugadoresEspecifico(mapaJugador);
+        break;
       case 7:
         //deshacerAccion(mapaJugador);
         printf("Funcion no implementada, comeback soon and come in!\n");
