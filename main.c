@@ -4,13 +4,27 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
-
 typedef struct Jugador {
   char nombre[32];
   int puntosH;
-  List* items;
-
+  Map* items;
+  
 } Jugador;
+
+typedef enum Accion {
+  AGREGAR_ITEM,
+  ELIMINAR_ITEM,
+  AUMENTAR_PH
+} Accion;
+
+typedef struct Pila {
+  char nombre[32];
+  Accion accion;
+  char item[32];
+  int puntosH;
+
+} Pila;
+
 
 /*
   función para comparar claves de tipo string
@@ -34,8 +48,8 @@ void crearPerfil(Map* mapa) {
   Jugador* nuevoJugador = NULL;
   nuevoJugador = (Jugador *) malloc(sizeof(Jugador));
   nuevoJugador->puntosH = 0;
-  nuevoJugador->items = createList();
-  Stack* stack = stack_create(); //Aun no 100% implementada de forma correcta.
+  nuevoJugador->items = createMap(is_equal_string);
+  
   
   
   char nombre[32];
@@ -47,10 +61,9 @@ void crearPerfil(Map* mapa) {
   getchar();
 
   strcpy(nuevoJugador->nombre,nombre);
-  
-  stack_push(stack,nuevoJugador);
   insertMap(mapa, nuevoJugador->nombre, nuevoJugador);
-
+  
+  printf("Se ha creado correctamente el perfil del jugador %s\n",nuevoJugador->nombre);
 }
 
 void mostrarPerfil(Map* mapa) {
@@ -72,23 +85,22 @@ void mostrarPerfil(Map* mapa) {
 
     int contador = 1;
     
-    void* aux = firstList(jugadorBuscado->items);
-    
-    if (aux == NULL) {
-      printf("El jugador no ha conseguido items hasta el momento\n\n");
-    }
+    char* aux = firstMap(jugadorBuscado->items);
     
     while(aux != NULL) {
-      printf("%i-%s\n",contador,(char*)aux);
-      aux = nextList(jugadorBuscado->items);
+      printf("  %i-%s\n",contador,aux);
+      
+      aux = nextMap(jugadorBuscado->items);
       contador++;
+     }
+    if (contador  == 1) {
+      printf("El jugador no ha conseguido items hasta el momento\n");
     }
   }
 }
 
-void agregarItem(Map* mapa) {
+void agregarItem(Map* mapa, Stack* stack) {
   getchar();
-  
   char buscado[32];
   printf("Ingrese nombre del jugador al que desea agregar un item:\n");
   scanf("%30[^\n]s",buscado);
@@ -103,14 +115,25 @@ void agregarItem(Map* mapa) {
     printf("Ingrese el nombre del item a agregar:\n");
     scanf("%30[^\n]s",item);
     getchar();
-    pushBack(jugadorBuscado->items, strdup(item));
+    
+    Pila* registro = (Pila *) malloc(sizeof(Pila));
+    strcpy(registro->nombre, buscado);
+    registro->accion = AGREGAR_ITEM;
+    strcpy(registro->item, strdup(item));
+    
+    
+    insertMap(jugadorBuscado->items, strdup(item), strdup(item));
+    stack_push(stack, registro);
     
     printf("Se ha agregado el item '%s' al inventario del jugador '%s'\n", item, jugadorBuscado->nombre);
   }
 }
 
 
-void eliminarItem(Map* mapa) {
+
+
+
+void eliminarItem(Map* mapa, Stack* stack) {
   getchar();
   
   char buscado[32];
@@ -129,30 +152,38 @@ void eliminarItem(Map* mapa) {
   scanf("%30[^\n]s",item);
   getchar();
 
-  void* aux = firstList(jugadorBuscado->items);
+  void* aux = firstMap(jugadorBuscado->items);
 
   while(aux != NULL) {
     if (strcmp(aux,item) == 0) {
-      popCurrent(jugadorBuscado->items);
+      eraseMap(jugadorBuscado->items, item);
       break;
     }
-    aux = nextList(jugadorBuscado->items);
+    aux = nextMap(jugadorBuscado->items);
   }
+  //freddy fasbear
   if(aux == NULL) {
     printf("El item indicado no existe en el inventario del Jugador %s\n",jugadorBuscado->nombre);
+    return;
   } else {
+    Pila* registro = (Pila*) malloc(sizeof(Pila));
+    strcpy(registro->nombre, buscado);
+    registro->accion = ELIMINAR_ITEM; 
+    strcpy(registro->item, item);
+    
+    stack_push(stack, registro);
     printf("Item '%s' eliminado con exito!\n", item);
   }
   
 }
-
-void agregarPuntos(Map* mapa) {
+//i dunno i was thinking
+void agregarPuntos(Map* mapa, Stack* stack) {
   getchar();
   char buscado[32];
   printf("Ingrese nombre del jugador al que desea agregarle los puntos:\n");
   scanf("%30[^\n]s",buscado);
   getchar();
-
+// leaving my child behind
   Jugador * jugadorBuscado = searchMap(mapa, buscado);
   if (jugadorBuscado == NULL) {
     printf("El jugador indicado no existe!\n"); 
@@ -163,6 +194,13 @@ void agregarPuntos(Map* mapa) {
   printf("Ingrese el puntaje a agregar:\n");
   scanf("%i", &puntaje);
   jugadorBuscado->puntosH = puntaje;
+
+  Pila* registro = (Pila*) malloc(sizeof(Pila));
+  strcpy(registro->nombre, buscado);
+  registro->accion = AUMENTAR_PH; 
+  registro->puntosH = puntaje;
+  
+  stack_push(stack, registro);
   printf("Se ha agregado el puntaje '%i' al jugador '%s'\n", puntaje, jugadorBuscado->nombre);
 }
 
@@ -173,30 +211,69 @@ void mostrarJugadoresEspecifico(Map* mapa) {
   scanf("%30[^\n]s",item);
   getchar();
   printf("%s\n", item);
-  int foundItem = 0;
+  int encontrarItem = 0;
 
   Jugador * aux = firstMap(mapa);
   while (aux != NULL) {
-    void* aux2 = firstList(aux->items);
+    char* aux2 = firstMap(aux->items);
     while(aux2 != NULL) {
       if (strcmp(aux2,item) == 0) {
-        foundItem++;
+        encontrarItem++;
         printf("\n === PERFIL DEL JUGADOR === \n");
         printf("Nombre: %s\n", aux->nombre);
         printf("Item: %s\n", item);
       }
-      aux2 = nextList(aux->items);
+      aux2 = nextMap(aux->items);
     }
     aux = nextMap(mapa);
   }
   
-  if (!foundItem) {
+  if (!encontrarItem) {
     printf("Ningún jugador tiene el item '%s'\n", item);
   }
   
 }
 
-void deshacerAccion(Map* mapa) {}
+void deshacerAccion(Map* mapa, Stack* stack) {
+  getchar();
+  char buscado[32];
+  printf("Ingrese nombre del jugador al que desea deshacer la última accion:\n");
+  scanf("%30[^\n]s",buscado);
+  getchar();
+
+  Jugador * jugadorBuscado = searchMap(mapa, buscado);
+  if (jugadorBuscado == NULL) {
+    printf("El jugador indicado no existe!\n"); 
+    return;
+  }
+
+  Pila* aux;
+  
+  while(stack_top(stack) != NULL) {
+    aux = stack_pop(stack);
+    if (strcmp(aux->nombre,buscado) == 0) {
+      switch(aux->accion) {
+        case AGREGAR_ITEM:
+          if(searchMap(jugadorBuscado->items,aux->item) != NULL) {
+            eraseMap(jugadorBuscado->items, aux->item);
+            return;
+          }
+
+        case ELIMINAR_ITEM:
+          if(searchMap(jugadorBuscado->items, aux->item) == NULL) {
+            insertMap(jugadorBuscado->items, strdup(aux->item), strdup(aux->item));
+            return;
+          }
+
+        case AUMENTAR_PH:
+          jugadorBuscado->puntosH -= aux->puntosH;
+          return;
+      }
+    }
+  }
+  printf("Se ha deshecho correctamente la última acción del jugador %s\n", jugadorBuscado->nombre);
+  
+}
 
 void exportarArchivo(Map* mapa) {}
 
@@ -205,6 +282,7 @@ void importarArchivo(Map* mapa) {}
 
 int main() {
   Map* mapaJugador = createMap(is_equal_string);
+  Stack* stack = stack_create();
   int opcion, titulo = 0;
 
   while(1) {
@@ -225,7 +303,6 @@ int main() {
     printf("7. Deshacer última acción de jugador/a\n");
     printf("8. Exportar datos de jugadores a archivo de texto\n");
     printf("9. Cargar datos de jugadores desde un archivo de texto\n");
-    printf("9. Cargar datos de jugadores desde un archivo de texto\n");
     printf("10. Salir del programa\n");
     
     scanf("%d",&opcion);
@@ -241,21 +318,20 @@ int main() {
         mostrarPerfil(mapaJugador);
         break;
       case 3:
-        agregarItem(mapaJugador);
+        agregarItem(mapaJugador, stack);
         break;
       case 4:
-        eliminarItem(mapaJugador);
+        eliminarItem(mapaJugador, stack);
         break;
       case 5:
-        agregarPuntos(mapaJugador);
+        agregarPuntos(mapaJugador, stack);
         break;
       case 6:
         mostrarJugadoresEspecifico(mapaJugador);
         break;
       case 7:
-        //deshacerAccion(mapaJugador);
-        printf("Funcion no implementada, comeback soon and come in!\n");
-        //break;
+        deshacerAccion(mapaJugador, stack);
+        break;
       case 8:
         //exportarArchivo(mapaJugador);
         printf("Funcion no implementada, comeback soon and come in!\n");
@@ -266,7 +342,6 @@ int main() {
         //break;
       case 10:
         printf("Cerrando el programa...\n");
-        printf("hola");
       return 0;
         
     }
