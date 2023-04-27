@@ -9,6 +9,7 @@ typedef struct Jugador {
   char nombre[32];
   int puntosH;
   Map* items;
+  int contadorItems;
 } Jugador;
 
 typedef enum Accion {
@@ -87,7 +88,7 @@ void crearPerfil(Map* mapa) {
   nuevoJugador = (Jugador *) malloc(sizeof(Jugador));
   nuevoJugador->puntosH = 0;
   nuevoJugador->items = createMap(is_equal_string);
-  
+  nuevoJugador->contadorItems = 0;
   char nombre[32];
 
   getchar();
@@ -118,7 +119,8 @@ void mostrarPerfil(Map* mapa) {
     printf("\n === PERFIL DEL JUGADOR === \n");
     printf("Nombre: %s\n", jugadorBuscado->nombre);
     printf("Puntos de Habilidad: %d\n", jugadorBuscado->puntosH);
-
+    printf("Cantidad de items: %d\n", jugadorBuscado->contadorItems);
+    
     int contador = 1;
     
     char* aux = firstMap(jugadorBuscado->items);
@@ -151,6 +153,7 @@ void agregarItem(Map* mapa, Stack* stack) {
     printf("Ingrese el nombre del item a agregar:\n");
     scanf("%30[^\n]s",item);
     getchar();
+    jugadorBuscado->contadorItems++;
     
     Pila* registro = (Pila *) malloc(sizeof(Pila));
     strcpy(registro->nombre, buscado);
@@ -193,7 +196,6 @@ void eliminarItem(Map* mapa, Stack* stack) {
     }
     aux = nextMap(jugadorBuscado->items);
   }
-  //freddy fasbear
   if(aux == NULL) {
     printf("El item indicado no existe en el inventario del Jugador %s\n",jugadorBuscado->nombre);
     return;
@@ -204,18 +206,17 @@ void eliminarItem(Map* mapa, Stack* stack) {
     strcpy(registro->item, item);
     
     stack_push(stack, registro);
+    jugadorBuscado->contadorItems--;
     printf("Item '%s' eliminado con exito!\n\n", item);
   }
   
 }
-//i dunno i was thinking
 void agregarPuntos(Map* mapa, Stack* stack) {
   getchar();
   char buscado[32];
   printf("Ingrese nombre del jugador al que desea agregarle los puntos:\n");
   scanf("%30[^\n]s",buscado);
   getchar();
-// leaving my child behind
   Jugador * jugadorBuscado = searchMap(mapa, buscado);
   if (jugadorBuscado == NULL) {
     printf("El jugador indicado no existe!\n"); 
@@ -242,18 +243,18 @@ void mostrarJugadoresEspecifico(Map* mapa) {
   printf("Ingrese el nombre del item a buscar\n");
   scanf("%30[^\n]s",item);
   getchar();
-  printf("%s\n", item);
+  
   int encontrarItem = 0;
-
+  printf("\n === Perfil de los jugadores con el item %s === \n", item);
   Jugador * aux = firstMap(mapa);
   while (aux != NULL) {
     char* aux2 = firstMap(aux->items);
     while(aux2 != NULL) {
       if (strcmp(aux2,item) == 0) {
         encontrarItem++;
-        printf("\n === PERFIL DEL JUGADOR === \n");
         printf("Nombre: %s\n", aux->nombre);
         printf("Item: %s\n", item);
+        printf("\n");
       }
       aux2 = nextMap(aux->items);
     }
@@ -319,6 +320,10 @@ void exportarArchivo(Map* mapa) {
   archExportar = fopen(nombreArchivo, "a");
   printf("Se han exportado los datos al archivo %s\n",nombreArchivo);
 
+  if (!archExportar) {
+    printf("Error: no se pudo abrir el archivo\n");
+    return;
+  }
   Jugador* auxMapa = firstMap(mapa);
  
   while(auxMapa != NULL) {
@@ -337,7 +342,58 @@ void exportarArchivo(Map* mapa) {
 }
 
 void importarArchivo(Map* mapa) {
+  FILE* archImportar;
+  char nombreArchivo[100];
+  printf("Ingrese el nombre del archivo del cual desea importar jugadores en formato .csv\n");
+  scanf("%s", nombreArchivo);
   
+  archImportar = fopen(nombreArchivo, "r");
+  printf("Se han importado los datos al archivo %s\n",nombreArchivo);
+  if (!archImportar) {
+    printf("Error: no se pudo abrir el archivo\n");
+    return;
+  }
+
+  char linea[1024];
+  fgets(linea,1024,archImportar);
+  
+  while (fgets(linea,1024,archImportar)){
+    Jugador* jugador = NULL;
+    jugador = (Jugador*) malloc(sizeof(Jugador));
+    //strcpy(jugador->nombre, nombre);
+    jugador->puntosH = 0;
+    jugador->items = createMap(is_equal_string);
+    
+
+    for(int i = 0 ; i < 4 ; i++) {
+      char* aux = get_csv_field(linea, i);
+      switch(i) {
+        case 0:
+          strcpy(jugador->nombre, aux);
+          break;
+
+        case 1:
+          jugador->puntosH = atoi(aux);
+          break;
+
+        case 2:
+          jugador->contadorItems = atoi(aux);
+          break;
+
+        case 3:
+          for(int j = 0 ; j < jugador->contadorItems ; j++) {
+            char * item = get_csv_field(linea, j+3);
+            insertMap(jugador->items, strdup(item), strdup(item));
+          }
+          break;
+        
+        default:
+          break;
+      }
+    }
+    insertMap(mapa, jugador->nombre, jugador);
+  }
+  fclose(archImportar);
 }
 
 
@@ -397,9 +453,8 @@ int main() {
         exportarArchivo(mapaJugador);
         break;
       case 9:
-        //importarArchivo(mapaJugador);
-        printf("Funcion no implementada, comeback soon and come in!\n");
-        //break;
+        importarArchivo(mapaJugador);
+        break;
       case 10:
         printf("Cerrando el programa...\n");
       return 0;

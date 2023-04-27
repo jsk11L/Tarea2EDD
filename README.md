@@ -1,5 +1,4 @@
 # Tarea2EDD
-hola jajaja
 
 void mostrarJugadoresEspecifico(Map* mapa) {
   getchar();
