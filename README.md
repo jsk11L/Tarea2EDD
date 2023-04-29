@@ -96,7 +96,7 @@ Estudiante: Javier Sepúlveda
 ------------------------------
 
 ===== 6 - ANALISIS DEL CÓDIGO =====
-Para esta tarea usamos unas ****. Para ello usaremos la siguiente estructura
+Usaremos la siguiente estructura
 
 ````c
 typedef struct Jugador {
