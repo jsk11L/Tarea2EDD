@@ -12,8 +12,7 @@
 
 ===== 1 - COMO COMPILAR Y EJECUTAR LA TAREA =====
 
-Al nosotros no tener compilador interno de C, para compilarlo y ejecutarlo luego de descargarlo lo que hicimos fue crear un nuevo replit, y abrir los 3 puntos al lado de Files para seleccionar la opción **Show hidden files**, con la opción activada, borramos los archivos **main.c** y **main**. Ahora apretamos los mismos 3 puntos de antes y ponemos **Upload folder**, seleccionamos la carpeta de Tarea-2-EDD, y cuando se suba, abrimos la carpeta y apretamos el archivo **main**, cuando cargue, basta con apretar el botón verde de **Run** de arriba y el código ya se ejecuta. 
-
+Lo primero que hay que hacer, es en el repositorio de GitHub, apretar el botón que dice **< > Code** y copiar el link que se encuenta abajo de donde dice HTTPS. Nosotros usamos Replit asi que lo que hicimos despúes fue crear un nuevo replit, y seleccionar la opción **Import from Github**, y pegar el link previamente copiado en la sección GitHub URL, luego seleccionamos el botón azul **Import from Github** y el código se importará automáticamente, también, solamente con apretar **Run** el código ya se compila solo y funciona correctamente.
 
 ===== 2 - LO QUE FUNCIONA Y LO QUE NO =====
   
